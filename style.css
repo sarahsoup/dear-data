@@ -1,0 +1,27 @@
+
+/*body{
+  background:#fdfbec;
+}*/
+
+.container{
+    position:relative;
+}
+.canvas{
+  width:100%;
+  min-height:600px;
+}
+
+.groups{
+  display: inline-block; /* doesn't look like it affects display*/
+  margin:10px;
+}
+
+.custom-tooltip{
+  position:absolute;
+  /*background:#fdfbec;*/
+  background:white;
+  text-align:center;
+  padding:2px;
+  height:20px;
+  border-radius:4px;
+}
