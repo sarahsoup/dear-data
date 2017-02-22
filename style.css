@@ -11,6 +11,10 @@
   min-height:600px;
 }
 
+.info, #desc{
+  font-size:18px;
+}
+
 .groups{
   display: inline-block; /* doesn't look like it affects display*/
   margin:10px;
