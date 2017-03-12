@@ -870,7 +870,7 @@ var lengthS = bracketS.node().getTotalLength();
       else{return lengthL}
     })
     .transition()
-    .delay(function(d){return 5000+((d.values[0].total+1)*600)})
+    .delay(function(d){return 5000+(((d.values[0].total+1)*150)+(d.values[0].circle_id-1)*600)})
     .duration(2000)
     .attr("stroke-dashoffset", 0);
 
