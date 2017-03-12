@@ -5,14 +5,14 @@ var m = {t:50,r:50,b:50,l:50},
 
 var plot = d3.select('.canvas')
   .append('svg')
-  .attr('width', w + m.l + m.r)
+  .attr('width', w)
   .attr('height', h + m.t + m.b)
   .append('g').attr('class','plot');
 
 //scale
 var scaleX = d3.scaleLinear()
   .domain([0,100])
-  .range([0,w + m.l + m.r]);
+  .range([0,w]);
 var scaleY = d3.scaleLinear()
   .domain([0,100])
   .range([0,h + m.t + m.b]);
@@ -28,15 +28,6 @@ var axisY = d3.axisLeft()
 //height of lines
 var lineH = 15;
 
-//add title
-// plot.append('text')
-//   .text('dear data week 08: phone addiction')
-//   .attr('x',function(d){return scaleX(90)})
-//   .attr('y',function(d){return scaleY(10)})
-//   .attr('fill','#3c3734')
-//   .attr('font-size','20px')
-//   .attr('text-anchor','end');
-
 d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
 
   //group rows by circle
@@ -44,11 +35,14 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .key(function(d){return d.place_situation})
     .entries(rows);
 
+  var instanceArray = [];
+
   //add radius and description to data
   circles.forEach(function(group){
     var total = group.values.length;
     var radius = ((total + 2) * 8) / (2 * Math.PI);
     var i = 1;
+    var adj = 15;
 
     // if(group.key == 'walking'){group.desc = 'while walking'}
     // else if(group.key == 'working'){group.desc = 'while working'}
@@ -88,13 +82,58 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
       instance.r = radius;
       instance.total = total;
       instance.id = i;
+      instance.x = instance.x - 5;
+
+      if(instanceArray.includes(instance.interaction_type)==false){
+        instanceArray.push(instance.interaction_type);
+      }
+      else{};
       i++;
     });
   });
 
   console.log(circles);
+  console.log(instanceArray);
+
 
 /*------------------------------------------------------------------------------*/
+
+  // create key
+  keyText = d3.select('.key')
+    .append('text');
+
+  keyInstance = keyText.selectAll('.key-instance')
+    .data(instanceArray)
+    .enter()
+    .append('tspan')
+    .attr('id',function(i){return i})
+    .attr('class','key-instance')
+    .html(function(i){return i + '<br/>'})
+    .style('color',function(i){
+      if (i == 'text_email'){return '#f9a980';}
+      else if (i == 'social_media'){return '#ac5e93';}
+      else if (i == 'other_app'){return '#7777a4';}
+      else if (i == 'time'){return '#b9d086';}
+      else if (i == 'weather'){return '#7cc4cb';}
+      else if (i == 'call'){return '#3683a4'}
+      else if (i == 'text_in_room'){return '#76b88f';}
+      else if (i == 'charge'){return '#f04e6e';}
+      else if (i == 'text_email_stefanie' || i == 'photo_postcards'){return '#f48f9f';}
+      else {return '#636466';}
+    });
+
+  keyText.append('tspan')
+    .attr('id','with-others')
+    .attr('class','key-attr')
+    .html('with others <br/>')
+    .style('color','#636466');
+
+  keyText.append('tspan')
+    .attr('id','other-phone')
+    .attr('class','key-attr')
+    .html('used someone else\'s phone <br/>')
+    .style('color','#636466');
+
   //create <g> for each group
   var groups = plot.selectAll('.groups')
     .data(circles)
@@ -102,47 +141,27 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .append('g')
     .attr('class','groups');
 
-    groups.append('circle')
-    .data(circles)
-    .attr('cx',function(d){return scaleX(d.values[0].x)})
-    .attr('cy',function(d){return scaleY(d.values[0].y)})
-    .attr('r',0)
-    // .style('stroke','#636466')
-    .style('stroke','black')
-    .style('opacity',.4)
-    .style('stroke-width',3)
-    .style('fill','none')
-    .transition()
-    .duration(4000)
-    .attr('r',function(d){return d.values[0].r})
-    .style('stroke-width',6)
-    .transition()
-    .duration(2000)
-    .style('stroke-width',0);
-
-  // groups.append('image')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'walking'})
-  //   .attr('href','./icons/walking.svg')
-  //   .attr('class','symbols')
-  //   .attr('x',function(d){return scaleX(d.values[0].x)-(d.values[0].r/2)})
-  //   .attr('y',function(d){return scaleY(d.values[0].y)-(d.values[0].r/2)})
-  //   .attr('height',function(d){return d.values[0].r})
-  //   .attr('width',function(d){return d.values[0].r})
-  //   .style('opacity',.4);
-
+  //append symbols
+  var symbolR = circles[8].values[0].r;
   function addSymbol(filterKey, fileName){
-    //appends for every circle
-    var symbol = groups.append('image')
-      .data(circles)
+    var symbol = groups.data(circles)
       .filter(function(d){return d.key == filterKey})
+      .append('image')
       .attr('href','./icons/' + fileName + '.svg')
       .attr('class','symbols')
       .attr('x',function(d){return scaleX(d.values[0].x)})
-      .attr('y',function(d){return scaleY(d.values[0].y)})
+      .attr('y',function(d){
+        if(d.key == 'public_transportation'){
+          return scaleY(d.values[0].y)-d.values[0].r+lineH-5-(symbolR/2)
+        }
+        else{
+          return scaleY(d.values[0].y)-d.values[0].r+lineH+5-(symbolR/2)
+        }
+      })
       .attr('height',0)
       .attr('width',0)
-      .style('opacity',.4);
+      .style('stroke','#636466')
+      .style('stroke-width',1.5);
     return symbol;
   }
 
@@ -159,18 +178,37 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
   d3.selectAll('.symbols')
     .transition()
     .duration(4000)
-    .attr('x',function(d){return scaleX(d.values[0].x)-(d.values[0].r/2)})
-    .attr('y',function(d){return scaleY(d.values[0].y)-(d.values[0].r/2)})
-    .attr('height',function(d){return d.values[0].r})
-    .attr('width',function(d){return d.values[0].r})
+    .attr('x',function(d){return scaleX(d.values[0].x)-(symbolR/2)})
+    .attr('y',function(d){
+      if(d.key == 'public_transportation'){
+        return scaleY(d.values[0].y)-d.values[0].r+lineH-5
+      }
+      else{
+        return scaleY(d.values[0].y)-d.values[0].r+lineH+5
+      }
+    })
+    .attr('height',symbolR)
+    .attr('width',symbolR)
     .transition()
     .duration(2000)
-    .style('opacity',.2);
+    .attr('transform',rotateSymbol);
 
-  //append lines for each instance
-  groups.selectAll('.instance')
+    function rotateSymbol(d){
+      var findCx = scaleX(d.values[0].x);
+      var findCy = scaleY(d.values[0].y);
+      var angle = (360/(d.values[0].total+3));
+      return 'rotate('+ angle +','+ findCx +','+ findCy +')';
+    };
+
+  //append g element for every instance
+  var instances = groups.selectAll('.instance')
     .data(function(d){return d.values})
     .enter()
+    .append('g')
+    .attr('class','instance-group');
+
+  //append lines for each instance
+  instances.data(function(d){return d.values})
     .filter(function(d){return d.interaction_type != 'photo_postcards' && d.interaction_type != 'thought_rang' && d.interaction_type != 'turned_face_down'})
     .append('line')
     .attr('class','instances')
@@ -181,19 +219,17 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .attr('transform',rotate)
     .style('stroke-width',stroke)
     .transition()
-    .delay(6000)
+    .delay(function(d){return cascade(d)})
     .style('stroke', color)
     .style('stroke-linecap','round')
     .style('stroke-dasharray',dash)
     .transition()
-    .duration(4000)
+    .duration(2000)
     .attr('y2',positionEnd);
 
 
   //append circles for interaction_type == 'photo_postcards'
-  groups.selectAll('.instance')
-    .data(function(d){return d.values})
-    .enter()
+  instances.data(function(d){return d.values})
     .filter(function(d){return d.interaction_type == 'photo_postcards'})
     .append('circle')
     .attr('class','instances')
@@ -203,14 +239,12 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .style('fill','none')
     .attr('transform',rotate)
     .transition()
-    .delay(6000)
-    .duration(2000)
+    .delay(function(d){return cascade(d)})
+    .duration(1000)
     .style('fill',color);
 
   //append double line for interaction_type == 'thought_rang'
-  groups.selectAll('.instance')
-    .data(function(d){return d.values})
-    .enter()
+  instances.data(function(d){return d.values})
     .filter(function(d){return d.interaction_type == 'thought_rang'})
     .append('line')
     .attr('class','instances')
@@ -221,15 +255,14 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .style('stroke-width',stroke)
     .attr('transform',rotate)
     .transition()
-    .delay(6000)
+    .delay(function(d){return cascade(d)})
     .style('stroke', color)
     .style('stroke-linecap','round')
     .transition()
-    .duration(4000)
+    .duration(2000)
+    .attr('y1',function(d){return scaleY(d.y)-d.r-(lineH/2);})
     .attr('y2',positionEnd);
-  groups.selectAll('.instance')
-    .data(function(d){return d.values})
-    .enter()
+  instances.data(function(d){return d.values})
     .filter(function(d){return d.interaction_type == 'thought_rang'})
     .append('line')
     .attr('class','instances')
@@ -240,22 +273,20 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .style('stroke-width',stroke)
     .attr('transform',rotate)
     .transition()
-    .delay(6000)
+    .delay(function(d){return cascade(d)})
     .style('stroke', color)
     .style('stroke-linecap','round')
     .transition()
-    .duration(4000)
+    .duration(2000)
+    .attr('y1',function(d){return scaleY(d.y)-d.r-(lineH/2);})
     .attr('y2',positionEnd);
 
-  //append curved line for interaction_type == 'turned_face_down'
-  var path = groups.selectAll('.instance')
-    .data(function(d){return d.values})
-    .enter()
+  var path1 = instances.data(function(d){return d.values})
     .filter(function(d){return d.interaction_type == 'turned_face_down'})
     .append('path')
     .attr('class','instances')
     .attr('d',function(d){
-      return 'M' +scaleX(d.x)+ ' ' +(scaleY(d.y)-d.r+(lineH/2))+ ' Q ' +(scaleX(d.x)+5)+ ' ' +(scaleY(d.y)-d.r+((lineH/4))+ ' ' +scaleX(d.x)+ ' ' +(scaleY(d.y)-d.r))+ ' T ' +scaleX(d.x)+ ' ' +(scaleY(d.y)-d.r-(lineH/2));
+      return 'M' +scaleX(d.x)+ ' ' +(scaleY(d.y)-d.r)+ ' Q ' +(scaleX(d.x)-5)+ ' ' +(scaleY(d.y)-d.r-((lineH/4))+ ' ' +scaleX(d.x)+ ' ' +(scaleY(d.y)-d.r-(lineH/2)));
     })
     .style('stroke-width',stroke)
     .style('stroke',color)
@@ -263,27 +294,40 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .style('fill','none')
     .attr('transform',rotate);
 
-  var totalLength = path.node().getTotalLength();
+    var path2 = instances.data(function(d){return d.values})
+      .filter(function(d){return d.interaction_type == 'turned_face_down'})
+      .append('path')
+      .attr('class','instances')
+      .attr('d',function(d){
+        return 'M' +scaleX(d.x)+ ' ' +(scaleY(d.y)-d.r)+ ' Q ' +(scaleX(d.x)+5)+ ' ' +(scaleY(d.y)-d.r+((lineH/4))+ ' ' +scaleX(d.x)+ ' ' +(scaleY(d.y)-d.r+(lineH/2)));
+      })
+      .style('stroke-width',stroke)
+      .style('stroke',color)
+      .style('stroke-linecap','round')
+      .style('fill','none')
+      .attr('transform',rotate);
 
-  path
+  var totalLength = path1.node().getTotalLength();
+
+  path1
     .attr("stroke-dasharray", totalLength + " " + totalLength)
     .attr("stroke-dashoffset", totalLength)
     .transition()
-    .delay(6000)
-    .duration(4000)
-    // .ease("linear")
+    .delay(function(d){return cascade(d)})
+    .duration(2000)
     .attr("stroke-dashoffset", 0);
 
+  path2
+    .attr("stroke-dasharray", totalLength + " " + totalLength)
+    .attr("stroke-dashoffset", totalLength)
+    .transition()
+    .delay(function(d){return cascade(d)})
+    .duration(2000)
+    .attr("stroke-dashoffset", 0);
 
-  // enable interaction for all instances
-  groups.selectAll('.instances')
-    .on('mouseenter',function(d){
-
-        // var tooltip = d3.select('.custom-tooltip');
-        // tooltip.select('.type')
-        //     .html(d.interaction_desc)
-        //     .style('font-size','12px');
-        // tooltip.transition().style('opacity',1);
+/*------------------------------------------------------------------------------*/
+  // enable interactions
+  instances.on('mouseenter',function(d){
 
         var thisLine = this;
         var thisType = d.interaction_type;
@@ -291,305 +335,349 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         var thisOtherPhone = d.others_phone_in;
         var thisKey = d.place_situation;
 
-        groups.selectAll('.instances')
+        instances.transition()
+          .duration(500)
+          .style('opacity',function(d){
+            if(d.interaction_type == thisType){return 1;}
+            else{return .1;}
+        });
+        groups.selectAll('.details-start')
           .transition()
+          .duration(500)
+          .style('opacity',function(d){
+            if(d.key == thisKey){return 1;}
+            else{return .1;}
+          });
+        groups.selectAll('.details-end')
+          .transition()
+          .duration(500)
+          .style('opacity',function(d){
+            if(d.key == thisKey){return 1;}
+            else{return .1;}
+          });
+          groups.selectAll('.symbols')
+            .transition()
+            .duration(500)
+            .style('opacity',function(d){
+              if(d.key == thisKey){return 1;}
+              else{return .1;}
+            });
+          keyInstance.transition()
+            .duration(500)
+            .style('opacity',function(d){
+              if(d == thisType){return 1;}
+              else{return .1;}
+            })
+          keyText.select('#with-others')
+            .transition()
+            .duration(500)
+            .style('opacity',function(d){
+              if(thisWithOthers > 0){return 1;}
+              else{return .1;}
+            })
+          keyText.select('#other-phone')
+            .transition()
+            .duration(500)
+            .style('opacity',function(d){
+              if(thisOtherPhone > 0){return 1;}
+              else{return .1;}
+            })
+      })
+      .on('mouseleave',function(d){
+        instances.transition()
+          .duration(500)
+          .style('opacity',1);
+        groups.selectAll('.symbols')
+          .transition()
+          .duration(500)
+          .style('opacity',1);
+        groups.selectAll('.details-start')
+          .transition()
+          .duration(500)
+          .style('opacity',1);
+        groups.selectAll('.details-end')
+          .transition()
+          .duration(500)
+          .style('opacity',1);
+        keyInstance.transition()
+          .duration(500)
+          .style('opacity',1);
+        keyText.selectAll('.key-attr')
+          .transition()
+          .duration(500)
+          .style('opacity',1);
+    });
+
+    keyInstance.on('mouseenter',function(d){
+        var thisType = this.id;
+
+        keyInstance.transition()
+          .duration(500)
+          .style('opacity',function(d){
+            if(this.id == thisType){
+              return 1;
+            }
+            else{
+              return .1;
+            }
+          });
+        instances.transition()
           .duration(500)
           .style('opacity',function(d){
             if(d.interaction_type == thisType){
               return 1;
             }
             else{
-              return .3;
+              return .1;
             }
           });
-
-        d3.select('#group')
-          .text(function(){return d.desc});
-        d3.select('#interaction')
-          .text(function(){return d.interaction_desc});
-        d3.select('#extras')
-          .text(function(){
-            if(d.with_others_ct == 1 && d.others_phone_in == 1){
-              return 'used someone else\'s phone, with ' +d.with_others_ct+ ' person'
-            }
-            else if(d.with_others_ct == 1 && d.others_phone_in == 0){
-              return 'with ' +d.with_others_ct+ ' person'
-            }
-            else if(d.with_others_ct > 1 && d.others_phone_in == 1){
-              return 'used someone else\'s phone, with ' +d.with_others_ct+ ' people'
-            }
-            else if(d.with_others_ct > 1 && d.others_phone_in == 0){
-              return 'with ' +d.with_others_ct+ ' people'
-            }
-            else if(d.with_others_ct == 0 && d.others_phone_in == 1){
-              return 'used someone else\'s phone'
-            }
-            else{ return 'by myself'}
-          });
-          d3.selectAll('.info')
-            .style('color',function(){
-              if (d.interaction_type == 'text_email'){return '#f9a980';}
-              else if (d.interaction_type == 'social_media'){return '#ac5e93';}
-              else if (d.interaction_type == 'other_app'){return '#7777a4';}
-              else if (d.interaction_type == 'time'){return '#b9d086';}
-              else if (d.interaction_type == 'weather'){return '#7cc4cb';}
-              else if (d.interaction_type == 'call'){return '#3683a4'}
-              else if (d.interaction_type == 'text_in_room'){return '#76b88f';}
-              else if (d.interaction_type == 'charge'){return '#f04e6e';}
-              else if (d.interaction_type == 'text_email_stefanie' || d.interaction_type == 'photo_postcards'){return '#f48f9f';}
-              else {return '#636466';}
-            });
-
-          groups.selectAll('.symbols')
-            .transition()
-            .duration(500)
-            .style('opacity',function(d){
-              if(d.key == thisKey){
-                return .3;
-              }
-              else{
-                return .05;
-              }
-            });
-
-        //how do I specify attributes associated with a particular instance?
-        // groups.selectAll('.details')
-        //   .style('opacity',function(d){
-        //     if()
-        //   });
+        groups.selectAll('.details-start')
+          .transition()
+          .duration(500)
+          .style('opacity',.1);
+        groups.selectAll('.details-end')
+          .transition()
+          .duration(500)
+          .style('opacity',.1);
+        groups.selectAll('.symbols')
+          .transition()
+          .duration(500)
+          .style('opacity',.1);
     })
-    // .on('mousemove',function(d){
-    //     var tooltip = d3.select('.custom-tooltip');
-    //     var xy = d3.mouse( d3.select('.container').node() );
-    //     tooltip
-    //         .style('left',xy[0]+10+'px')
-    //         .style('top',xy[1]+(-10)+'px');
-    // })
     .on('mouseleave',function(d){
-        var tooltip = d3.select('.custom-tooltip');
-        tooltip.transition().style('opacity',0);
-        groups.selectAll('.instances')
+        instances.transition()
+          .duration(500)
+          .style('opacity',1);
+        keyInstance.transition()
+          .duration(500)
+          .style('opacity',1)
+        groups.selectAll('.details-start')
+          .transition()
+          .duration(500)
+          .style('opacity',1)
+        groups.selectAll('.details-end')
+          .transition()
+          .duration(500)
+          .style('opacity',1)
+        groups.selectAll('.symbols')
+          .transition()
+          .duration(500)
+          .style('opacity',1);
+    });
+
+  keyText.select('#with-others')
+    .on('mouseenter',function(d){
+      instances.transition()
+        .duration(500)
+        .style('opacity',function(d){
+          if(d.with_others_ct > 0){return 1;}
+          else{return .1;}
+        })
+      groups.selectAll('.details-start')
+        .transition()
+        .duration(500)
+        .style('opacity',.1);
+      groups.selectAll('.details-end')
+        .transition()
+        .duration(500)
+        .style('opacity',.1);
+      groups.selectAll('.symbols')
+        .transition()
+        .duration(500)
+        .style('opacity',.1);
+    })
+    .on('mouseleave',function(d){
+      instances.transition()
+        .duration(500)
+        .style('opacity',1);
+      groups.selectAll('.details-start')
+        .transition()
+        .duration(500)
+        .style('opacity',1);
+      groups.selectAll('.details-end')
+        .transition()
+        .duration(500)
+        .style('opacity',1);
+      groups.selectAll('.symbols')
+        .transition()
+        .duration(500)
+        .style('opacity',1);
+    });
+
+    keyText.select('#other-phone')
+      .on('mouseenter',function(d){
+        instances.transition()
+          .duration(500)
+          .style('opacity',function(d){
+            if(d.others_phone_in == 1){return 1;}
+            else{return .1;}
+          })
+        groups.selectAll('.details-start')
+          .transition()
+          .duration(500)
+          .style('opacity',.1);
+        groups.selectAll('.details-end')
+          .transition()
+          .duration(500)
+          .style('opacity',.1);
+        groups.selectAll('.symbols')
+          .transition()
+          .duration(500)
+          .style('opacity',.1);
+      })
+      .on('mouseleave',function(d){
+        instances.transition()
+          .duration(500)
+          .style('opacity',1);
+        groups.selectAll('.details-start')
+          .transition()
+          .duration(500)
+          .style('opacity',1);
+        groups.selectAll('.details-end')
           .transition()
           .duration(500)
           .style('opacity',1);
         groups.selectAll('.symbols')
           .transition()
           .duration(500)
-          .style('opacity',.2);
+          .style('opacity',1);
+      });
+
+  groups.selectAll('.symbols')
+    .on('mouseenter',function(d){
+      var thisKey = d.key;
+
+      groups.selectAll('.symbols')
+        .transition()
+        .duration(500)
+        .style('opacity',function(d){
+          if(d.key == thisKey){
+            return 1;
+          }
+          else{
+            return .1;
+          }
+        })
+
+      instances.transition()
+        .duration(500)
+        .style('opacity',function(d){
+          if(d.place_situation == thisKey){
+            return 1;
+          }
+          else{
+            return .1;
+          }
+        })
+
+      groups.selectAll('.details-start')
+        .transition()
+        .duration(500)
+        .style('opacity',function(d){
+          if(d.key == thisKey){
+            return 1;
+          }
+          else{
+            return .1;
+          }
+        })
+      groups.selectAll('.details-end')
+        .transition()
+        .duration(500)
+        .style('opacity',function(d){
+          if(d.key == thisKey){
+            return 1;
+          }
+          else{
+            return .1;
+          }
+        })
+    })
+    .on('mouseleave',function(d){
+
+    groups.selectAll('.symbols')
+      .transition()
+      .duration(500)
+      .style('opacity',1)
+    instances.transition()
+      .duration(500)
+      .style('opacity',1)
+    groups.selectAll('.details-start')
+      .transition()
+      .duration(500)
+      .style('opacity',1)
+    groups.selectAll('.details-end')
+      .transition()
+      .duration(500)
+      .style('opacity',1)
     });
 
+/*------------------------------------------------------------------------------*/
   //append others_phone_in attribute
-  groups.selectAll('.attribute')
-    .data(function(d){return d.values})
-    .enter()
+  instances.data(function(d){return d.values})
     .filter(function(d){return d.others_phone_in == 1})
     .append('line')
     .attr('class','details')
-    .attr('x1',function(d){return scaleX(d.x)-2})
-    .attr('x2',function(d){return scaleX(d.x)+2})
+    .attr('x1',function(d){return scaleX(d.x)})
+    .attr('x2',function(d){return scaleX(d.x)})
     .attr('y1',function(d){return scaleY(d.y)-d.r-lineH-5})
     .attr('y2',function(d){return scaleY(d.y)-d.r-lineH-5})
-    .style('stroke-width',1.5)
-    .style('stroke', 'none')
+    .style('stroke-width',0)
+    .style('stroke', '#636466')
     .style('stroke-linecap','round')
-    .style('opacity',0)
-    .attr('transform',rotate);
+    .attr('transform',rotate)
+    .transition()
+    .delay(function(d){return cascade(d)+1500})
+    .duration(500)
+    .style('stroke-width',1.5)
+    .transition()
+    .duration(1000)
+    .attr('x1',function(d){return scaleX(d.x)-2})
+    .attr('x2',function(d){return scaleX(d.x)+2});
 
-  //append with_others_ct attribute: iterated manually
-  groups.selectAll('.attribute')
-    .data(function(d){return d.values})
-    .enter()
-    .filter(function(d){return d.with_others_ct > 0})
-    .append('circle')
-    .attr('class','details')
-    .attr('r',1)
-    .attr('cx',function(d){return scaleX(d.x)})
-    .attr('cy',function(d){
-      if(d.interaction_type == 'photo_postcards'){
-        return scaleY(d.y)-d.r-2-(6*1);
-      }
-      else if(d.reason_in == 1){
-        if(d.others_phone_in == 1){
-          return scaleY(d.y)-d.r-lineH-4-(6*1);
-        }
-        else{
-          return scaleY(d.y)-d.r-lineH-(6*1);
-        }
-      }
-      else if(d.reason_in == 2){
-        return scaleY(d.y)-d.r-(6*1);
-      }
-      else{
-        return scaleY(d.y)-d.r-(lineH/2)-(6*1);
-      }
-    })
-    .style('fill','#636466')
-    .style('opacity',0)
-    .attr('transform',rotate);
+    // append with_others_ct attribute: iterated dynamically
+    var max = d3.max(rows, function(d) { return d.with_others_ct; });
+    var i;
+    for(i = 1; i <= max; i++){
+      instances.data(function(d){return d.values})
+        .filter(function(d){return d.with_others_ct >= i})
+        .append('circle')
+        .attr('class','details')
+        .attr('r',0)
+        .attr('cx',function(d){return scaleX(d.x)})
+        .attr('cy',function(d){
+          if(d.interaction_type == 'photo_postcards'){
+            return scaleY(d.y)-d.r-2-(6*i);
+          }
+          else if(d.reason_in == 1){
+            if(d.others_phone_in == 1){
+              return scaleY(d.y)-d.r-lineH-4-(6*i);
+            }
+            else{
+              return scaleY(d.y)-d.r-lineH-(6*i);
+            }
+          }
+          else if(d.reason_in == 2){
+            return scaleY(d.y)-d.r-(6*i);
+          }
+          else{
+            return scaleY(d.y)-d.r-(lineH/2)-(6*i);
+          }
+        })
+        .style('fill','#636466')
+        .attr('transform',rotate)
+        .transition()
+        .delay(function(d){return cascade(d)+2000+((i-1)*500)})
+        .duration(1000)
+        .attr('r',1);
+    };
 
-  groups.selectAll('.attribute')
-    .data(function(d){return d.values})
-    .enter()
-    .filter(function(d){return d.with_others_ct > 1})
-    .append('circle')
-    .attr('class','details')
-    .attr('r',1)
-    .attr('cx',function(d){return scaleX(d.x)})
-    .attr('cy',function(d){
-      if(d.interaction_type == 'photo_postcards'){
-        return scaleY(d.y)-d.r-2-(6*2);
-      }
-      else if(d.reason_in == 1){
-        if(d.others_phone_in == 1){
-          return scaleY(d.y)-d.r-lineH-4-(6*2);
-        }
-        else{
-          return scaleY(d.y)-d.r-lineH-(6*2);
-        }
-      }
-      else if(d.reason_in == 2){
-        return scaleY(d.y)-d.r-(6*2);
-      }
-      else{
-        return scaleY(d.y)-d.r-(lineH/2)-(6*2);
-      }
-    })
-    .style('fill','#636466')
-    .style('opacity',0)
-    .attr('transform',rotate);
+/*------------------------------------------------------------------------------*/
+  //functions
+  function cascade(d){
+    return 5000+(d.id*150)+((d.circle_id-1)*600)
+  };
 
-  groups.selectAll('.attribute')
-    .data(function(d){return d.values})
-    .enter()
-    .filter(function(d){return d.with_others_ct > 2})
-    .append('circle')
-    .attr('class','details')
-    .attr('r',1)
-    .attr('cx',function(d){return scaleX(d.x)})
-    .attr('cy',function(d){
-      if(d.interaction_type == 'photo_postcards'){
-        return scaleY(d.y)-d.r-2-(6*3);
-      }
-      else if(d.reason_in == 1){
-        if(d.others_phone_in == 1){
-          return scaleY(d.y)-d.r-lineH-4-(6*3);
-        }
-        else{
-          return scaleY(d.y)-d.r-lineH-(6*3);
-        }
-      }
-      else if(d.reason_in == 2){
-        return scaleY(d.y)-d.r-(6*3);
-      }
-      else{
-        return scaleY(d.y)-d.r-(lineH/2)-(6*3);
-      }
-    })
-    .style('fill','#636466')
-    .style('opacity',0)
-    .attr('transform',rotate);
-
-  groups.selectAll('.attribute')
-    .data(function(d){return d.values})
-    .enter()
-    .filter(function(d){return d.with_others_ct > 3})
-    .append('circle')
-    .attr('class','details')
-    .attr('r',1)
-    .attr('cx',function(d){return scaleX(d.x)})
-    .attr('cy',function(d){
-      if(d.interaction_type == 'photo_postcards'){
-        return scaleY(d.y)-d.r-2-(6*4);
-      }
-      else if(d.reason_in == 1){
-        if(d.others_phone_in == 1){
-          return scaleY(d.y)-d.r-lineH-4-(6*4);
-        }
-        else{
-          return scaleY(d.y)-d.r-lineH-(6*4);
-        }
-      }
-      else if(d.reason_in == 2){
-        return scaleY(d.y)-d.r-(6*4);
-      }
-      else{
-        return scaleY(d.y)-d.r-(lineH/2)-(6*4);
-      }
-    })
-    .style('fill','#636466')
-    .style('opacity',0)
-    .attr('transform',rotate);
-
-  groups.selectAll('.attribute')
-    .data(function(d){return d.values})
-    .enter()
-    .filter(function(d){return d.with_others_ct > 4})
-    .append('circle')
-    .attr('class','details')
-    .attr('r',1)
-    .attr('cx',function(d){return scaleX(d.x)})
-    .attr('cy',function(d){
-      if(d.interaction_type == 'photo_postcards'){
-        return scaleY(d.y)-d.r-2-(6*5);
-      }
-      else if(d.reason_in == 1){
-        if(d.others_phone_in == 1){
-          return scaleY(d.y)-d.r-lineH-4-(6*5);
-        }
-        else{
-          return scaleY(d.y)-d.r-lineH-(6*5);
-        }
-      }
-      else if(d.reason_in == 2){
-        return scaleY(d.y)-d.r-(6*5);
-      }
-      else{
-        return scaleY(d.y)-d.r-(lineH/2)-(6*5);
-      }
-    })
-    .style('fill','#636466')
-    .style('opacity',0)
-    .attr('transform',rotate);
-
-    // append with_others_ct attribute: iterated dynamically, works but appends too many
-    // circles.forEach(function(group){
-    //   group.values.forEach(function(d){
-    //     var i;
-    //     for(i = 1; i <= d.with_others_ct; i++){
-    //       groups.selectAll('.attribute')
-    //         .data(function(d){return d.values})
-    //         .enter()
-    //         .filter(function(d){return d.with_others_ct >= i})
-    //         .append('circle')
-    //         .attr('class','details')
-    //         .attr('r',1)
-    //         .attr('cx',function(d){return scaleX(d.x)})
-    //         .attr('cy',function(d){
-    //           if(d.interaction_type == 'photo_postcards'){
-    //             return scaleY(d.y)-d.r-2-(6*i);
-    //           }
-    //           else if(d.reason_in == 1){
-    //             if(d.others_phone_in == 1){
-    //               return scaleY(d.y)-d.r-lineH-4-(6*i);
-    //             }
-    //             else{
-    //               return scaleY(d.y)-d.r-lineH-(6*i);
-    //             }
-    //           }
-    //           else if(d.reason_in == 2){
-    //             return scaleY(d.y)-d.r-(6*i);
-    //           }
-    //         })
-            // .style('fill','none')
-            // .attr('transform',rotate)
-            // .transition()
-            // .delay(6000)
-            // .style('fill','#636466');
-    //     }
-    //   })
-    // });
-
-  //attribute functions
   function rotate(d){
     var findCx = scaleX(d.x);
     var findCy = scaleY(d.y);
@@ -598,15 +686,7 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
   };
 
   function positionStart(d){
-    if (d.reason_in == 0){
-      return scaleY(d.y)-d.r-(lineH/2);
-    }
-    else if (d.reason_in == 1){
       return scaleY(d.y)-d.r;
-    }
-    else if (d.reason_in == 2){
-      return scaleY(d.y)-d.r;
-    }
   };
 
   function positionEnd(d){
@@ -707,284 +787,103 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
 
 /*------------------------------------------------------------------------------*/
   // append beginning and end circle attributes
-  groups.append('path')
-     .data(circles)
+  var bracketL = groups.data(circles)
      .filter(function(d){return d.key != 'public_transportation'})
+     .append('path')
      .attr('d',function(d){
        return 'M' +(scaleX(d.values[0].x)+5)+ ' ' +(scaleY(d.values[0].y)-d.values[0].r-lineH-5)+ ' H ' +(scaleX(d.values[0].x))+ ' V ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+5);
      })
-     .attr('class','details')
+     .attr('class','details-start')
      .style('stroke','#636466')
      .style('stroke-width',1.5)
      .style('fill','none')
-     .style('opacity',0)
+    //  .style('opacity',0)
      .attr('transform',rotateSymbol);
 
-  groups.append('path')
-    .data(circles)
+  groups.data(circles)
     .filter(function(d){return d.key != 'public_transportation'})
+    .append('path')
     .attr('d',function(d){
       return 'M' +(scaleX(d.values[0].x)-5)+ ' ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+5)+ ' H ' +(scaleX(d.values[0].x))+ ' V ' +(scaleY(d.values[0].y)-d.values[0].r-lineH-5);
     })
-    .attr('class','details')
+    .attr('class','details-end')
     .style('stroke','#636466')
     .style('stroke-width',1.5)
     .style('fill','none')
-    .style('opacity',0)
+    // .style('opacity',0)
     .attr('transform',function(d){
         return 'rotate('+ (360/(d.values[0].total+3))*(d.values[0].total+2) +','+ scaleX(d.values[0].x)+','+ scaleY(d.values[0].y) +')';
     });
 
-  groups.append('path')
-     .data(circles)
+  var bracketS = groups.data(circles)
      .filter(function(d){return d.key == 'public_transportation'})
+     .append('path')
      .attr('d',function(d){
        return 'M' +(scaleX(d.values[0].x)+5)+ ' ' +(scaleY(d.values[0].y)-d.values[0].r-lineH-5)+ ' H ' +(scaleX(d.values[0].x))+ ' V ' +(scaleY(d.values[0].y)-d.values[0].r+(lineH)-5);
      })
-     .attr('class','details')
+     .attr('class','details-start')
      .style('stroke','#636466')
      .style('stroke-width',1.5)
      .style('fill','none')
-     .style('opacity',0)
+    //  .style('opacity',0)
      .attr('transform',rotateSymbol);
 
-  groups.append('path')
-    .data(circles)
+  groups.data(circles)
     .filter(function(d){return d.key == 'public_transportation'})
+    .append('path')
     .attr('d',function(d){
       return 'M' +(scaleX(d.values[0].x)-5)+ ' ' +(scaleY(d.values[0].y)-d.values[0].r+(lineH)-5)+ ' H ' +(scaleX(d.values[0].x))+ ' V ' +(scaleY(d.values[0].y)-d.values[0].r-lineH-5);
     })
-    .attr('class','details')
+    .attr('class','details-end')
     .style('stroke','#636466')
     .style('stroke-width',1.5)
     .style('fill','none')
-    .style('opacity',0)
+    // .style('opacity',0)
     .attr('transform',function(d){
         return 'rotate('+ (360/(d.values[0].total+3))*(d.values[0].total+2) +','+ scaleX(d.values[0].x)+','+ scaleY(d.values[0].y) +')';
     });
 
-  groups.selectAll('.details')
+var lengthL = bracketL.node().getTotalLength();
+var lengthS = bracketS.node().getTotalLength();
+
+  groups.selectAll('.details-start')
+    .attr('stroke-dasharray',function(d){
+      if(d.key == 'public_transportation'){return lengthS + ' ' + lengthS}
+      else{return lengthL + ' ' + lengthL}
+    })
+    .attr("stroke-dashoffset", function(d){
+      if(d.key == 'public_transportation'){return lengthS}
+      else{return lengthL}
+    })
     .transition()
-    .delay(6000)
-    .duration(4000)
-    .style('opacity',1);
+    .delay(function(d){return 5000+((d.values[0].circle_id-1)*600)})
+    .duration(2000)
+    .attr("stroke-dashoffset", 0);
 
-/*------------------------------------------------------------------------------*/
-  // append individual symbols
-  // groups.append('path')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'walking'})
-  //   .attr('class','symbol')
-  //   .attr('d',function(d){
-  //     return 'M' +(scaleX(d.values[0].x)-5)+ ' ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+5)+ ' Q ' +(scaleX(d.values[0].x+0.5))+ ' ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+10)+ ' ' +(scaleX(d.values[0].x)-5)+ ' ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+15);
-  //   })
-  //   .attr('transform',rotateSymbol);
-  // groups.append('path')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'walking'})
-  //   .attr('class','symbol')
-  //   .attr('d',function(d){
-  //     return 'M' +(scaleX(d.values[0].x)+5)+ ' ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+5)+ ' Q ' +(scaleX(d.values[0].x-0.5))+ ' ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+10)+ ' ' +(scaleX(d.values[0].x)+5)+ ' ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+15);
-  //   })
-  //   .attr('transform',rotateSymbol);
-  //
-  // groups.append('line')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'working'})
-  //   .attr('class','symbol')
-  //   .attr('x1',function(d){return scaleX(d.values[0].x)})
-  //   .attr('x2',function(d){return scaleX(d.values[0].x)})
-  //   .attr('y1',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+5})
-  //   .attr('y2',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+16})
-  //   .attr('transform',rotateSymbol);
-  // groups.append('line')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'working'})
-  //   .attr('class','symbol')
-  //   .attr('x1',function(d){return scaleX(d.values[0].x)-6})
-  //   .attr('x2',function(d){return scaleX(d.values[0].x)+6})
-  //   .attr('y1',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+10})
-  //   .attr('y2',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+10})
-  //   .attr('transform',rotateSymbol);
-  // groups.append('line')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'working'})
-  //   .attr('class','symbol')
-  //   .attr('x1',function(d){return scaleX(d.values[0].x)-5})
-  //   .attr('x2',function(d){return scaleX(d.values[0].x)+5})
-  //   .attr('y1',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+5})
-  //   .attr('y2',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+15})
-  //   .attr('transform',rotateSymbol);
-  // groups.append('line')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'working'})
-  //   .attr('class','symbol')
-  //   .attr('x1',function(d){return scaleX(d.values[0].x)+5})
-  //   .attr('x2',function(d){return scaleX(d.values[0].x)-5})
-  //   .attr('y1',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+5})
-  //   .attr('y2',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+15})
-  //   .attr('transform',rotateSymbol);
-  //
-  // groups.append('path')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'waiting'})
-  //   .attr('class','symbol')
-  //   .attr('d',function(d){
-  //     return 'M' +(scaleX(d.values[0].x)-6)+ ' ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+7)+ ' H ' +(scaleX(d.values[0].x)-1.5)+ ' V ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+17)+ ' H ' +(scaleX(d.values[0].x)-6);
-  //   })
-  //   .attr('transform',rotateSymbol);
-  // groups.append('path')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'waiting'})
-  //   .attr('class','symbol')
-  //   .attr('d',function(d){
-  //     return 'M' +(scaleX(d.values[0].x)+6)+ ' ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+7)+ ' H ' +(scaleX(d.values[0].x)+1.5)+ ' V ' +(scaleY(d.values[0].y)-d.values[0].r+lineH+17)+ ' H ' +(scaleX(d.values[0].x)+6);
-  //   })
-  //   .attr('transform',rotateSymbol);
-  //
-  // groups.append('circle')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'bathroom'})
-  //   .attr('class','symbol-circle')
-  //   .attr('cx',function(d){return scaleX(d.values[0].x)})
-  //   .attr('cy',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+8})
-  //   .attr('r',4)
-  //   .style('stroke','#3c3734')
-  //   .style('stroke-width',1.5)
-  //   .style('fill','none')
-  //   .attr('transform',rotateSymbol);
-  // groups.append('line')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'bathroom'})
-  //   .attr('class','symbol')
-  //   .attr('x1',function(d){return scaleX(d.values[0].x)+6})
-  //   .attr('x2',function(d){return scaleX(d.values[0].x)-6})
-  //   .attr('y1',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+4})
-  //   .attr('y2',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+12})
-  //   .attr('transform',rotateSymbol);
-  //
-  // groups.append('circle')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'couch'})
-  //   .attr('class','symbol-circle')
-  //   .attr('cx',function(d){return scaleX(d.values[0].x)})
-  //   .attr('cy',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+8})
-  //   .attr('r',4)
-  //   .style('stroke','#3c3734')
-  //   .style('stroke-width',1.5)
-  //   .style('fill','none')
-  //   .attr('transform',rotateSymbol);
-  //
-  // groups.append('rect')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'bed'})
-  //   .attr('class','symbol')
-  //   .attr('x',function(d){return scaleX(d.values[0].x)-4})
-  //   .attr('y',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+5})
-  //   .attr('width',8)
-  //   .attr('height',8)
-  //   .attr('transform',rotateSymbol);
-  // groups.append('circle')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'bed'})
-  //   .attr('class','symbol-circle')
-  //   .attr('cx',function(d){return scaleX(d.values[0].x)})
-  //   .attr('cy',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+9})
-  //   .attr('r',1)
-  //   .style('fill','#3c3734')
-  //   .attr('transform',rotateSymbol);
-  //
-  // groups.append('line')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'home_other'})
-  //   .attr('class','symbol')
-  //   .attr('x1',function(d){return scaleX(d.values[0].x)-5})
-  //   .attr('x2',function(d){return scaleX(d.values[0].x)})
-  //   .attr('y1',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+12})
-  //   .attr('y2',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+5})
-  //   .attr('transform',rotateSymbol);
-  // groups.append('line')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'home_other'})
-  //   .attr('class','symbol')
-  //   .attr('x1',function(d){return scaleX(d.values[0].x)+5})
-  //   .attr('x2',function(d){return scaleX(d.values[0].x)})
-  //   .attr('y1',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+12})
-  //   .attr('y2',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+5})
-  //   .attr('transform',rotateSymbol);
-  //
-  // groups.append('line')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'restaurants_shops'})
-  //   .attr('class','symbol')
-  //   .attr('x1',function(d){return scaleX(d.values[0].x)})
-  //   .attr('x2',function(d){return scaleX(d.values[0].x)})
-  //   .attr('y1',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+5})
-  //   .attr('y2',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+15})
-  //   .attr('transform',rotateSymbol);
-  // groups.append('circle')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'restaurants_shops'})
-  //   .attr('class','symbol-circle')
-  //   .attr('cx',function(d){return scaleX(d.values[0].x)+5})
-  //   .attr('cy',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+7})
-  //   .attr('r',2)
-  //   .style('fill','#3c3734')
-  //   .attr('transform',rotateSymbol);
-  // groups.append('circle')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'restaurants_shops'})
-  //   .attr('class','symbol-circle')
-  //   .attr('cx',function(d){return scaleX(d.values[0].x)-5})
-  //   .attr('cy',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+13})
-  //   .attr('r',2)
-  //   .style('fill','#3c3734')
-  //   .attr('transform',rotateSymbol);
-  //
-  // groups.append('line')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'public_transportation'})
-  //   .attr('class','symbol')
-  //   .attr('x1',function(d){return scaleX(d.values[0].x)-5})
-  //   .attr('x2',function(d){return scaleX(d.values[0].x)})
-  //   .attr('y1',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+7})
-  //   .attr('y2',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH})
-  //   .attr('transform',rotateSymbol);
-  // groups.append('line')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'public_transportation'})
-  //   .attr('class','symbol')
-  //   .attr('x1',function(d){return scaleX(d.values[0].x)+5})
-  //   .attr('x2',function(d){return scaleX(d.values[0].x)})
-  //   .attr('y1',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+7})
-  //   .attr('y2',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH})
-  //   .attr('transform',rotateSymbol);
-  // groups.append('line')
-  //   .data(circles)
-  //   .filter(function(d){return d.key == 'public_transportation'})
-  //   .attr('class','symbol')
-  //   .attr('x1',function(d){return scaleX(d.values[0].x)-5})
-  //   .attr('x2',function(d){return scaleX(d.values[0].x)+5})
-  //   .attr('y1',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+10})
-  //   .attr('y2',function(d){return scaleY(d.values[0].y)-d.values[0].r+lineH+10})
-  //   .attr('transform',rotateSymbol);
-
-
-  function rotateSymbol(d){
-    var findCx = scaleX(d.values[0].x);
-    var findCy = scaleY(d.values[0].y);
-    var angle = (360/(d.values[0].total+3));
-    return 'rotate('+ angle +','+ findCx +','+ findCy +')';
-  };
+  groups.selectAll('.details-end')
+    .attr('stroke-dasharray',function(d){
+      if(d.key == 'public_transportation'){return lengthS + ' ' + lengthS}
+      else{return lengthL + ' ' + lengthL}
+    })
+    .attr("stroke-dashoffset", function(d){
+      if(d.key == 'public_transportation'){return lengthS}
+      else{return lengthL}
+    })
+    .transition()
+    .delay(function(d){return 5000+((d.values[0].total+1)*600)})
+    .duration(2000)
+    .attr("stroke-dashoffset", 0);
 
 });
+
+/*------------------------------------------------------------------------------*/
 
 function parse(d){
   return {
     id: +d.id,
     x: +d.x,
     y: +d.y,
-    circle_id: d.circle_id,
+    circle_id: +d.circle_id,
     place_situation: d.place_situation,
     interaction_type: d.interaction_type,
     reason_in: +d.reason_in,
@@ -992,31 +891,3 @@ function parse(d){
     others_phone_in: +d.others_phone_in
   };
 };
-
-
-//append rectangles
-  // groups.selectAll('.instance')
-  //   .data(function(d){return d.values})
-  //   .enter()
-  //   .append('rect')
-  //   .attr('x',function(d){return scaleX(d.x)})
-  //   .attr('y',function(d){
-  //     if (d.reason_in == 0){
-  //       return scaleY(d.y)-d.r-(rectH/2);
-  //     }
-  //     else if (d.reason_in == 1){
-  //       return scaleY(d.y)-d.r-rectH;
-  //     }
-  //     else if (d.reason_in == 2){
-  //       return scaleY(d.y)-d.r;
-  //     }
-  //   })
-  //   .attr('width',2)
-  //   .attr('height',rectH)
-  //   .attr('transform',function(d,i){
-  //     var findCx = scaleX(d.x);
-  //     var findCy = scaleY(d.y);
-  //     var angle = (360/(d.total+2))*(d.id+1);
-  //     return 'rotate('+ angle +','+ findCx +','+ findCy +')';
-  //   })
-  //   .style('fill',);
