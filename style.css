@@ -10,19 +10,38 @@
 .canvas{
   width:100%;
   min-height:600px;
+  margin-top:20px;
+  margin-bottom:20px;
+}
+
+#plot-size{
+  position:absolute;
+  right:0px;
 }
 
 .key{
   position:absolute;
   width:200px;
   height:500px;
-  /*float:right;*/
-  right:0px;
-  top:200px;
+  top:175px;
+  cursor:default;
 }
+
+/*#key-title{
+  padding-bottom:10px;
+}*/
 
 .key-instance .key-attr{
   font-size:16px;
+  display:block;
+}
+
+#public_transportation{
+  padding-bottom:10px;
+}
+
+#with-others{
+  padding-top:10px;
 }
 
 .info, #desc{
