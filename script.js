@@ -117,6 +117,17 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
 /*------------------------------------------------------------------------------*/
 
   // create key
+  d3.select('.key')
+    .append('g')
+    .attr('id','title-group')
+    .append('text')
+    .text('groups')
+    .style('color','#636466')
+    .style('opacity',0)
+    .transition()
+    .delay(500)
+    .duration(500)
+    .style('opacity',0.7);
 
   keyGroup = d3.select('.key').selectAll('.key-group')
     .data(circles)
@@ -124,7 +135,8 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .append('g')
     .attr('id',function(d){return d.key})
     .attr('class','key-group')
-    .style('display','block');
+    .style('display','block')
+    .style('opacity',0);
 
   keyGroup.append('text')
     .text(function(d){
@@ -140,13 +152,26 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     })
     .style('color','#636466');
 
+  d3.select('.key')
+    .append('g')
+    .attr('id','title-instance')
+    .append('text')
+    .text('instances')
+    .style('color','#636466')
+    .style('opacity',0)
+    .transition()
+    .delay(1000 + 1300 + 500)
+    .duration(500)
+    .style('opacity',0.7);
+
   keyInstance = d3.select('.key').selectAll('.key-instance')
     .data(instanceArray)
     .enter()
     .append('g')
     .attr('id',function(i){return i})
     .attr('class','key-instance')
-    .style('display','block');
+    .style('display','block')
+    .style('opacity',0);
 
   keyInstance.append('text')
     .text(function(i){
@@ -176,6 +201,18 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
       else if (i == 'text_email_stefanie' || i == 'photo_postcards'){return '#f48f9f';}
       else {return '#636466';}
     });
+
+  d3.select('.key')
+    .append('g')
+    .attr('id','title-attr')
+    .append('text')
+    .text('attributes')
+    .style('color','#636466')
+    .style('opacity',0)
+    .transition()
+    .delay(5600)
+    .duration(500)
+    .style('opacity',0.7);
 
   d3.select('.key')
     .append('g')
@@ -212,6 +249,36 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .style('display','block')
     .text('picked because of an alert')
     .style('color','#636466');
+
+  //animate key
+  d3.selectAll('.key-group')
+    .transition()
+    .delay(function(d){return 1000+(d.values[0].circle_id-1)*100})
+    .duration(500)
+    .style('opacity',1);
+
+  d3.selectAll('.key-instance')
+  .transition()
+  .delay(function(d){
+    var i = instanceArray.indexOf(d);
+    return 3300+((i+1)*100);
+  })
+  .duration(500)
+  .style('opacity',1);
+
+  d3.selectAll('.key-attr')
+    .style('opacity',0)
+    .transition()
+    .delay(function(){
+      if(this.id == 'with-others'){return 6100+(1*100)}
+      else if(this.id == 'other-phone'){return 6100+(2*100)}
+      else if(this.id == 'picked-purposely'){return 6100+(3*100)}
+      else if(this.id == 'picked-alert'){return 6100+(4*100)}
+    })
+    .duration(500)
+    .style('opacity',1);
+
+/*------------------------------------------------------------------------------*/
 
   //create <g> for each group
   var groups = plot.selectAll('.groups')
@@ -256,20 +323,10 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .transition()
     .delay(function(d){return (d.values[0].circle_id-1)*200})
     .duration(2000)
-    // .attr('x',function(d){return scaleX(d.values[0].x)-(symbolR/2)})
-    // .attr('y',function(d){
-    //   if(d.key == 'public_transportation'){
-    //     return scaleY(d.values[0].y)-d.values[0].r+lineH-5
-    //   }
-    //   else{
-    //     return scaleY(d.values[0].y)-d.values[0].r+lineH+5
-    //   }
-    // })
     .attr('height',symbolR*2)
     .attr('width',symbolR*2)
     .transition()
     .duration(2000)
-    // .attr('transform',rotateSymbol)
     .attr('height',symbolR)
     .attr('width',symbolR);
 
@@ -575,17 +632,11 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         groups.selectAll('.details-start')
           .transition()
           .duration(500)
-          .style('opacity',function(d){
-            if(d.key == thisKey){return 1;}
-            else{return .1;}
-          });
+          .style('opacity',.1)
         groups.selectAll('.details-end')
           .transition()
           .duration(500)
-          .style('opacity',function(d){
-            if(d.key == thisKey){return 1;}
-            else{return .1;}
-          });
+          .style('opacity',.1)
           groups.selectAll('.symbols')
             .transition()
             .duration(500)
@@ -665,12 +716,16 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     keyGroup.on('mouseenter',function(d){
       var thisKey = this.id;
 
-      // keyGroup.transition()
-      //   .duration(500)
-      //   .style('opacity',function(d){
-      //     if(d.key == thisKey){return 1;}
-      //     else{return .1;}
-      //   });
+      keyGroup.transition()
+        .duration(500)
+        .style('opacity',function(d){
+          if(d.key == thisKey){return 1;}
+          else{return .1;}
+        })
+        .style('font-weight',function(d){
+          if(d.key == thisKey){return 'bold';}
+          else{return 'normal';}
+        });
 
         groups.selectAll('.symbols')
           .transition()
@@ -678,14 +733,14 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           .style('opacity',function(d){
             if(d.key == thisKey){return 1;}
             else{return .1;}
-          })
+          });
 
         instances.transition()
           .duration(500)
           .style('opacity',function(d){
             if(d.place_situation == thisKey){return 1;}
             else{return .1;}
-          })
+          });
 
         groups.selectAll('.details-start')
           .transition()
@@ -693,46 +748,51 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           .style('opacity',function(d){
             if(d.key == thisKey){return 1;}
             else{return .1;}
-          })
+          });
         groups.selectAll('.details-end')
           .transition()
           .duration(500)
           .style('opacity',function(d){
             if(d.key == thisKey){return 1;}
             else{return .1;}
-          })
+          });
         })
         .on('mouseleave',function(d){
-        // keyGroup.transition()
-        // .transition()
-        // .duration(500)
-        // .style('opacity',1)
-        groups.selectAll('.symbols')
-        .transition()
-        .duration(500)
-        .style('opacity',1)
-        instances.transition()
-        .duration(500)
-        .style('opacity',1)
-        groups.selectAll('.details-start')
-        .transition()
-        .duration(500)
-        .style('opacity',1)
-        groups.selectAll('.details-end')
-        .transition()
-        .duration(500)
-        .style('opacity',1)
+          keyGroup.transition()
+            .transition()
+            .duration(500)
+            .style('opacity',1)
+            .style('font-weight','normal')
+          groups.selectAll('.symbols')
+            .transition()
+            .duration(500)
+            .style('opacity',1)
+          instances.transition()
+            .duration(500)
+            .style('opacity',1)
+          groups.selectAll('.details-start')
+            .transition()
+            .duration(500)
+            .style('opacity',1)
+          groups.selectAll('.details-end')
+            .transition()
+            .duration(500)
+            .style('opacity',1)
         });
 
 
     keyInstance.on('mouseenter',function(d){
         var thisType = this.id;
-        // keyInstance.transition()
-        //   .duration(500)
-        //   .style('opacity',function(d){
-        //     if(this.id == thisType){return 1;}
-        //     else{return .1;}
-        //   });
+        keyInstance.transition()
+          .duration(500)
+          .style('opacity',function(d){
+            if(this.id == thisType){return 1;}
+            else{return .1;}
+          })
+          .style('font-weight',function(d){
+            if(this.id == thisType){return 'bold';}
+            else{return 'normal';}
+          });
         instances.transition()
           .duration(500)
           .style('opacity',function(d){
@@ -750,15 +810,24 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         groups.selectAll('.symbols')
           .transition()
           .duration(500)
-          .style('opacity',.1);
+          .style('opacity',function(d){
+            var x = 0;
+            d.values.forEach(function(e){
+              if(e.interaction_type == thisType){x++;}
+              else{}
+            })
+            if(x > 0){return 1;}
+            else{return .1;}
+          });
     })
     .on('mouseleave',function(d){
-        // instances.transition()
-        //   .duration(500)
-        //   .style('opacity',1);
+        instances.transition()
+          .duration(500)
+          .style('opacity',1)
         keyInstance.transition()
           .duration(500)
           .style('opacity',1)
+          .style('font-weight','normal')
         groups.selectAll('.details-start')
           .transition()
           .duration(500)
@@ -775,6 +844,10 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
 
   d3.select('#with-others')
     .on('mouseenter',function(d){
+      d3.select('#with-others')
+        .transition()
+        .duration(500)
+        .style('font-weight','bold');
       instances.transition()
         .duration(500)
         .style('opacity',function(d){
@@ -792,9 +865,23 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
       groups.selectAll('.symbols')
         .transition()
         .duration(500)
-        .style('opacity',.1);
+        .style('opacity',function(d){
+          var x = 0;
+          d.values.forEach(function(e){
+            if(e.with_others_ct > 0){x++;}
+            else{}
+          })
+          if(x > 0){return 1;}
+          else{return .1;}
+        });
+      d3.select('#supplement')
+        .text('each dot above usage represents one person');
     })
     .on('mouseleave',function(d){
+      d3.select('#with-others')
+        .transition()
+        .duration(500)
+        .style('font-weight','normal');
       instances.transition()
         .duration(500)
         .style('opacity',1);
@@ -810,20 +897,27 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         .transition()
         .duration(500)
         .style('opacity',1);
+      d3.select('#supplement')
+        .text('');
     });
 
     d3.select('#picked-purposely')
       .on('mouseenter',function(d){
-        // d3.select('#picked-alert')
-        //   .transition()
-        //   .duration(500)
-        //   .style('opacity',.1)
+        d3.select('#picked-purposely')
+          .transition()
+          .duration(500)
+          .style('opacity',1)
+          .style('font-weight','bold');
+        d3.select('#picked-alert')
+          .transition()
+          .duration(500)
+          .style('opacity',.1);
         instances.transition()
           .duration(500)
           .style('opacity',function(d){
             if(d.reason_in == 1){return 1;}
             else{return .1;}
-          })
+          });
         groups.selectAll('.details-start')
           .transition()
           .duration(500)
@@ -835,12 +929,27 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         groups.selectAll('.symbols')
           .transition()
           .duration(500)
-          .style('opacity',.1);
+          .style('opacity',function(d){
+            var x = 0;
+            d.values.forEach(function(e){
+              if(e.reason_in == 1){x++;}
+              else{}
+            })
+            if(x > 0){return 1;}
+            else{return .1;}
+          });
+        d3.select('#supplement')
+          .text('usage positioned inside the group circle');
       })
       .on('mouseleave',function(d){
-        // d3.selectAll('.key-attr')
-        //   .duration(500)
-        //   .style('opacity',1)
+        d3.select('#picked-purposely')
+          .transition()
+          .duration(500)
+          .style('font-weight','normal');
+        d3.select('#picked-alert')
+          .transition()
+          .duration(500)
+          .style('opacity',1);
         instances.transition()
           .duration(500)
           .style('opacity',1);
@@ -856,14 +965,21 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           .transition()
           .duration(500)
           .style('opacity',1);
+        d3.select('#supplement')
+          .text('');
       });
 
     d3.select('#picked-alert')
       .on('mouseenter',function(d){
-        // d3.select('#picked-purposely')
-        //   .transition()
-        //   .duration(500)
-        //   .style('opacity',.1)
+        d3.select('#picked-alert')
+          .transition()
+          .duration(500)
+          .style('opacity',1)
+          .style('font-weight','bold');
+        d3.select('#picked-purposely')
+          .transition()
+          .duration(500)
+          .style('opacity',.1);
         instances.transition()
           .duration(500)
           .style('opacity',function(d){
@@ -881,12 +997,27 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         groups.selectAll('.symbols')
           .transition()
           .duration(500)
-          .style('opacity',.1);
+          .style('opacity',function(d){
+            var x = 0;
+            d.values.forEach(function(e){
+              if(e.reason_in == 2){x++;}
+              else{}
+            })
+            if(x > 0){return 1;}
+            else{return .1;}
+          });
+        d3.select('#supplement')
+          .text('usage positioned outside the group circle');
       })
       .on('mouseleave',function(d){
-        // d3.selectAll('.key-attr')
-        //   .duration(500)
-        //   .style('opacity',1)
+        d3.select('#picked-alert')
+          .transition()
+          .duration(500)
+          .style('font-weight','normal');
+        d3.select('#picked-purposely')
+          .transition()
+          .duration(500)
+          .style('opacity',1);
         instances.transition()
           .duration(500)
           .style('opacity',1);
@@ -902,10 +1033,16 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           .transition()
           .duration(500)
           .style('opacity',1);
+        d3.select('#supplement')
+          .text('');
       });
 
     d3.select('#other-phone')
       .on('mouseenter',function(d){
+        d3.select('#other-phone')
+          .transition()
+          .duration(500)
+          .style('font-weight','bold');
         instances.transition()
           .duration(500)
           .style('opacity',function(d){
@@ -923,9 +1060,23 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         groups.selectAll('.symbols')
           .transition()
           .duration(500)
-          .style('opacity',.1);
+          .style('opacity',function(d){
+            var x = 0;
+            d.values.forEach(function(e){
+              if(e.others_phone_in == 1){x++;}
+              else{}
+            })
+            if(x > 0){return 1;}
+            else{return .1;}
+          });
+        d3.select('#supplement')
+          .text('marked by a horizontal line above usage');
       })
       .on('mouseleave',function(d){
+        d3.select('#other-phone')
+          .transition()
+          .duration(500)
+          .style('font-weight','normal');
         instances.transition()
           .duration(500)
           .style('opacity',1);
@@ -941,6 +1092,8 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           .transition()
           .duration(500)
           .style('opacity',1);
+        d3.select('#supplement')
+          .text('');
       });
 
   groups.selectAll('.symbols')
@@ -990,23 +1143,23 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         })
 
         //doesn't work
-        keyInstance.transition()
-          .duration(500)
-          .style('opacity',function(d){
-            var x = 0;
-            circles.forEach(function(group){
-              if(group.key == thisKey){
-                group.values.forEach(function(instance){
-                  if(instance.interaction_type == d.interaction_type){
-                    x++;
-                  }
-                })
-              }
-              console.log(x);
-              if(x > 0){return 1;}
-              else{return .1;}
-            });
-          })
+        // keyInstance.transition()
+        //   .duration(500)
+        //   .style('opacity',function(d){
+        //     var x = 0;
+        //     circles.forEach(function(group){
+        //       if(group.key == thisKey){
+        //         group.values.forEach(function(instance){
+        //           if(instance.interaction_type == d.interaction_type){
+        //             x++;
+        //           }
+        //         })
+        //       }
+        //       // console.log(x);
+        //       if(x > 0){return 1;}
+        //       else{return .1;}
+        //     });
+        //   })
 
       // keyInstance.transition()
       //   .duration(500)
