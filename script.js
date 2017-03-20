@@ -36,8 +36,6 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .key(function(d){return d.place_situation})
     .entries(rows);
 
-  var instanceArray = [];
-
   //add radius and description to data
   circles.forEach(function(group){
     var total = group.values.length;
@@ -47,16 +45,6 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
 
     group.values.forEach(function(instance){
 
-      // if(instance.place_situation == 'walking'){instance.desc = 'while walking'}
-      // else if(instance.place_situation == 'working'){instance.desc = 'while working'}
-      // else if(instance.place_situation == 'waiting'){instance.desc = 'while waiting for something or somebody'}
-      // else if(instance.place_situation == 'bathroom'){instance.desc = 'in the bathroom'}
-      // else if(instance.place_situation == 'couch'){instance.desc = 'on the couch'}
-      // else if(instance.place_situation == 'bed'){instance.desc = 'on the bed'}
-      // else if(instance.place_situation == 'home_other'){instance.desc = 'other places at home'}
-      // else if(instance.place_situation == 'restaurants_shops'){instance.desc = 'cafe/restaurants, shops...'}
-      // else if(instance.place_situation == 'public_transportation'){instance.desc = 'public transportation'};
-      //
       // if(instance.interaction_type == 'text_email'){instance.interaction_desc = 'text/email'}
       // else if(instance.interaction_type == 'social_media'){instance.interaction_desc = 'social media'}
       // else if(instance.interaction_type == 'other_app'){instance.interaction_desc = 'other apps'}
@@ -73,7 +61,6 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
       instance.r = radius;
       instance.total = total;
       instance.id = i;
-      // instance.x = instance.x + 5;
 
       if(instance.place_situation == 'working'){
         instance.x = instance.x + 3;
@@ -101,18 +88,15 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         instance.y = instance.y - 2;
       }
       else{};
-
-      if(instanceArray.includes(instance.interaction_type)==false){
-        instanceArray.push(instance.interaction_type);
-      }
-      else{};
       i++;
     });
   });
 
+  var instanceArray = ['text_email','text_email_stefanie','text_in_room','call','social_media',
+    'time','weather','photo_postcards','other_app','charge','thought_rang','no_report','turned_face_down'];
+
   console.log(circles);
   console.log(instanceArray);
-
 
 /*------------------------------------------------------------------------------*/
 
@@ -127,7 +111,7 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .transition()
     .delay(500)
     .duration(500)
-    .style('opacity',0.7);
+    .style('opacity',0.5);
 
   keyGroup = d3.select('.key').selectAll('.key-group')
     .data(circles)
@@ -160,9 +144,9 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .style('color','#636466')
     .style('opacity',0)
     .transition()
-    .delay(1000 + 1300 + 500)
+    .delay(1000 + 1300 + 1000)
     .duration(500)
-    .style('opacity',0.7);
+    .style('opacity',0.5);
 
   keyInstance = d3.select('.key').selectAll('.key-instance')
     .data(instanceArray)
@@ -181,12 +165,12 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
       else if(i == 'time'){return 'check the time'}
       else if(i == 'weather'){return 'check the weather'}
       else if(i == 'call'){return 'phone call'}
-      else if(i == 'text_in_room'){return 'text with somebody in the room'}
+      else if(i == 'text_in_room'){return 'text with someone in the room'}
       else if(i == 'charge'){return 'to charge it'}
-      else if(i == 'text_email_stefanie'){return 'text/email you'}
-      else if(i == 'photo_postcards'){return 'take pictures of our postcards!'}
+      else if(i == 'text_email_stefanie'){return 'text/email stefanie'}
+      else if(i == 'photo_postcards'){return 'take photos of the postcards'}
       else if(i == 'turned_face_down'){return 'turned the phone not to see it'}
-      else if(i == 'no_report'){return 'I didn\'t want to report it'}
+      else if(i == 'no_report'){return 'didn\'t want to report it'}
       else if(i == 'thought_rang'){return 'thought it rang but it didn\'t!'};
     })
     .style('color',function(i){
@@ -210,9 +194,9 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .style('color','#636466')
     .style('opacity',0)
     .transition()
-    .delay(5600)
+    .delay(5600 + 1000)
     .duration(500)
-    .style('opacity',0.7);
+    .style('opacity',0.5);
 
   d3.select('.key')
     .append('g')
@@ -261,7 +245,7 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
   .transition()
   .delay(function(d){
     var i = instanceArray.indexOf(d);
-    return 3300+((i+1)*100);
+    return 3800+((i+1)*100);
   })
   .duration(500)
   .style('opacity',1);
@@ -270,10 +254,10 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     .style('opacity',0)
     .transition()
     .delay(function(){
-      if(this.id == 'with-others'){return 6100+(1*100)}
-      else if(this.id == 'other-phone'){return 6100+(2*100)}
-      else if(this.id == 'picked-purposely'){return 6100+(3*100)}
-      else if(this.id == 'picked-alert'){return 6100+(4*100)}
+      if(this.id == 'with-others'){return 6100+(1*100)+1000}
+      else if(this.id == 'other-phone'){return 6100+(2*100)+1000}
+      else if(this.id == 'picked-purposely'){return 6100+(3*100)+1000}
+      else if(this.id == 'picked-alert'){return 6100+(4*100)+1000}
     })
     .duration(500)
     .style('opacity',1);
@@ -637,52 +621,76 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           .transition()
           .duration(500)
           .style('opacity',.1)
-          groups.selectAll('.symbols')
-            .transition()
-            .duration(500)
-            .style('opacity',function(d){
-              if(d.key == thisKey){return 1;}
-              else{return .1;}
-            });
+        groups.selectAll('.symbols')
+          .transition()
+          .duration(500)
+          .style('opacity',function(d){
+            if(d.key == thisKey){return 1;}
+            else{return .1;}
+          });
           keyGroup.transition()
             .duration(500)
             .style('opacity',function(d){
               if(d.key == thisKey){return 1;}
-              else{return .1;}
+              else{return .3;}
+            })
+            .style('font-weight',function(d){
+              if(d.key == thisKey){return 'bold';}
+              else{return 'normal';}
             })
           keyInstance.transition()
             .duration(500)
             .style('opacity',function(d){
               if(d == thisType){return 1;}
-              else{return .1;}
+              else{return .3;}
+            })
+            .style('font-weight',function(d){
+              if(d == thisType){return 'bold';}
+              else{return 'normal';}
             })
           d3.select('#with-others')
             .transition()
             .duration(500)
             .style('opacity',function(d){
               if(thisWithOthers > 0){return 1;}
-              else{return .1;}
+              else{return .3;}
+            })
+            .style('font-weight',function(d){
+              if(thisWithOthers > 0){return 'bold';}
+              else{return 'normal';}
             })
           d3.select('#other-phone')
             .transition()
             .duration(500)
             .style('opacity',function(d){
               if(thisOtherPhone > 0){return 1;}
-              else{return .1;}
+              else{return .3;}
+            })
+            .style('font-weight',function(d){
+              if(thisOtherPhone > 0){return 'bold';}
+              else{return 'normal';}
             })
           d3.select('#picked-purposely')
             .transition()
             .duration(500)
             .style('opacity',function(d){
               if(thisReason == 1){return 1;}
-              else{return .1;}
+              else{return .3;}
+            })
+            .style('font-weight',function(d){
+              if(thisReason == 1){return 'bold';}
+              else{return 'normal';}
             })
           d3.select('#picked-alert')
             .transition()
             .duration(500)
             .style('opacity',function(d){
               if(thisReason == 2){return 1;}
-              else{return .1;}
+              else{return .3;}
+            })
+            .style('font-weight',function(d){
+              if(thisReason == 2){return 'bold';}
+              else{return 'normal';}
             })
       })
       .on('mouseleave',function(d){
@@ -703,14 +711,17 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           .style('opacity',1);
         keyGroup.transition()
           .duration(500)
-          .style('opacity',1);
+          .style('opacity',1)
+          .style('font-weight','normal');
         keyInstance.transition()
           .duration(500)
-          .style('opacity',1);
+          .style('opacity',1)
+          .style('font-weight','normal');
         d3.selectAll('.key-attr')
           .transition()
           .duration(500)
-          .style('opacity',1);
+          .style('opacity',1)
+          .style('font-weight','normal');
     });
 
     keyGroup.on('mouseenter',function(d){
@@ -720,7 +731,7 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         .duration(500)
         .style('opacity',function(d){
           if(d.key == thisKey){return 1;}
-          else{return .1;}
+          else{return .3;}
         })
         .style('font-weight',function(d){
           if(d.key == thisKey){return 'bold';}
@@ -787,7 +798,7 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           .duration(500)
           .style('opacity',function(d){
             if(this.id == thisType){return 1;}
-            else{return .1;}
+            else{return .3;}
           })
           .style('font-weight',function(d){
             if(this.id == thisType){return 'bold';}
@@ -875,7 +886,11 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           else{return .1;}
         });
       d3.select('#supplement')
-        .text('each dot above usage represents one person');
+        .style('opacity',0)
+        .text('each dot represents a person')
+        .transition()
+        .duration(500)
+        .style('opacity',0.5);
     })
     .on('mouseleave',function(d){
       d3.select('#with-others')
@@ -898,7 +913,9 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         .duration(500)
         .style('opacity',1);
       d3.select('#supplement')
-        .text('');
+        .transition()
+        .duration(500)
+        .style('opacity',0);
     });
 
     d3.select('#picked-purposely')
@@ -911,7 +928,7 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         d3.select('#picked-alert')
           .transition()
           .duration(500)
-          .style('opacity',.1);
+          .style('opacity',.3);
         instances.transition()
           .duration(500)
           .style('opacity',function(d){
@@ -939,7 +956,11 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
             else{return .1;}
           });
         d3.select('#supplement')
-          .text('usage positioned inside the group circle');
+          .style('opacity',0)
+          .text('positioned outside the circle')
+          .transition()
+          .duration(500)
+          .style('opacity',0.5);
       })
       .on('mouseleave',function(d){
         d3.select('#picked-purposely')
@@ -966,7 +987,9 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           .duration(500)
           .style('opacity',1);
         d3.select('#supplement')
-          .text('');
+          .transition()
+          .duration(500)
+          .style('opacity',0);
       });
 
     d3.select('#picked-alert')
@@ -979,7 +1002,7 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
         d3.select('#picked-purposely')
           .transition()
           .duration(500)
-          .style('opacity',.1);
+          .style('opacity',.3);
         instances.transition()
           .duration(500)
           .style('opacity',function(d){
@@ -1007,7 +1030,11 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
             else{return .1;}
           });
         d3.select('#supplement')
-          .text('usage positioned outside the group circle');
+          .style('opacity',0)
+          .text('positioned inside the circle')
+          .transition()
+          .duration(500)
+          .style('opacity',0.5);
       })
       .on('mouseleave',function(d){
         d3.select('#picked-alert')
@@ -1034,7 +1061,9 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           .duration(500)
           .style('opacity',1);
         d3.select('#supplement')
-          .text('');
+          .transition()
+          .duration(500)
+          .style('opacity',0);
       });
 
     d3.select('#other-phone')
@@ -1070,7 +1099,11 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
             else{return .1;}
           });
         d3.select('#supplement')
-          .text('marked by a horizontal line above usage');
+          .text('represented by a horizontal line')
+          .style('opacity',0)
+          .transition()
+          .duration(500)
+          .style('opacity',0.5);
       })
       .on('mouseleave',function(d){
         d3.select('#other-phone')
@@ -1093,17 +1126,14 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           .duration(500)
           .style('opacity',1);
         d3.select('#supplement')
-          .text('');
+          .transition()
+          .duration(500)
+          .style('opacity',0);
       });
 
   groups.selectAll('.symbols')
     .on('mouseenter',function(d){
       var thisKey = d.key;
-      // console.log(thisKey);
-      // function findKey(d){ return d.key == thisKey};
-      // var thisIndex = circles.findIndex(findKey);
-      // groupArray = rows.filter(function(d){return d.place_situation == thiskey});
-      // console.log(groupArray);
 
       groups.selectAll('.symbols')
         .transition()
@@ -1112,14 +1142,12 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           if(d.key == thisKey){return 1;}
           else{return .1;}
         })
-
       instances.transition()
         .duration(500)
         .style('opacity',function(d){
           if(d.place_situation == thisKey){return 1;}
           else{return .1;}
         })
-
       groups.selectAll('.details-start')
         .transition()
         .duration(500)
@@ -1134,52 +1162,16 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
           if(d.key == thisKey){return 1;}
           else{return .1;}
         })
-
       keyGroup.transition()
         .duration(500)
         .style('opacity',function(d){
           if(d.key == thisKey){return 1;}
-          else{return .1;}
+          else{return .3;}
         })
-
-        //doesn't work
-        // keyInstance.transition()
-        //   .duration(500)
-        //   .style('opacity',function(d){
-        //     var x = 0;
-        //     circles.forEach(function(group){
-        //       if(group.key == thisKey){
-        //         group.values.forEach(function(instance){
-        //           if(instance.interaction_type == d.interaction_type){
-        //             x++;
-        //           }
-        //         })
-        //       }
-        //       // console.log(x);
-        //       if(x > 0){return 1;}
-        //       else{return .1;}
-        //     });
-        //   })
-
-      // keyInstance.transition()
-      //   .duration(500)
-      //   .style('opacity',function(d,i){
-      //     if(d.place_situation == thisKey && circle[thisIndex].values[i].includes(d.interaction_type)){return 1;}
-      //     else{return .1;}
-      //   })
-
-      // keyInstance.transition()
-      //   .duration(500)
-      //   .style('opacity',function(d){
-      //     var x = 0;
-      //     if(d.place_situation == thisKey && (rows[].place_situation == thisKey && rows[].interaction_type == d.interaction_type)){
-      //       x++;
-      //     };
-      //     console.log(x);
-      //     if(x>0){return 1;}
-      //     else{return .1;}
-      //   })
-
+        .style('font-weight',function(d){
+          if(d.key == thisKey){return 'bold';}
+          else{return 'normal';}
+        })
     })
     .on('mouseleave',function(d){
 
@@ -1201,6 +1193,7 @@ d3.csv('week_8_phone_addiction.csv',parse,function(err,rows){
     keyGroup.transition()
       .duration(500)
       .style('opacity',1)
+      .style('font-weight','normal')
     });
 
 /*------------------------------------------------------------------------------*/
