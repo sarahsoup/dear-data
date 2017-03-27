@@ -1,7 +1,7 @@
 
-/*body{
-  background:#fdfbec;
-}*/
+body{
+  background:#F1F2F2;
+}
 
 .container{
     position:relative;
@@ -60,8 +60,9 @@
   color:#636466;
 }
 
-.info, #desc{
+#desc{
   font-size:18px;
+  width:800px;
 }
 
 .groups{
